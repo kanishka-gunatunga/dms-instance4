@@ -30,9 +30,9 @@ export default function AllDocTable() {
           setShowToast(false);
         }, 5000);
       } catch (error) {
-         if (error instanceof Error && error.name === "AbortError") {
-           return;
-         }
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
 
         console.error("Error selecting folder:", error);
         setToastMessage("Failed to select folder or retrieve files.");

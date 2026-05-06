@@ -28,7 +28,7 @@ type ErrorsLocal = {
   document?: string;
 };
 
-
+ 
 export default function AllDocTable() {
   const isAuthenticated = useAuth();
   const { userId } = useUserContext();
@@ -815,31 +815,47 @@ export default function AllDocTable() {
                       
                     </div> */}
 
-<div className="d-flex flex-column">
+<div className="d-flex flex-column px-lg-3">
                       {uploadStarted && (
-                        <div className="d-flex flex-column mt-3">
-                          {uploadProgress.map((fileProgress, index) => (
-                            <div key={index} className="d-flex flex-row mb-3" style={{ width: '100%' }}>
-                              <p className="mb-0" style={{ fontSize: "14px" }}>{fileProgress.fileName}</p>
-                              <p
-                                className="ms-5 mb-0"
-                                style={{
-                                  fontSize: "14px",
-                                  fontWeight: 600,
-                                  color:
-                                    fileProgress.status === "pending" ? "black" :
-                                      fileProgress.status === "ongoing" ? "#683ab7" :
-                                        fileProgress.status === "completed" ? "green" :
-                                          fileProgress.status === "failed" ? "red" : "black"
-                                }}
-                              >
-                                {fileProgress.status === "pending" && "Pending"}
-                                {fileProgress.status === "ongoing" && "Uploading..."}
-                                {fileProgress.status === "completed" && "Completed"}
-                                {fileProgress.status === "failed" && "Failed"}
-                              </p>
-                            </div>
-                          ))}
+                        <div className="d-flex flex-column mt-3 w-100">
+                          <div className="mb-3">
+                            <p className="mb-1" style={{ fontSize: "14px", fontWeight: 600 }}>
+                              Uploading {uploadProgress.filter(p => p.status === "completed" || p.status === "failed").length} out of {uploadProgress.length}
+                            </p>
+                            <Progress 
+                              percent={Math.round((uploadProgress.filter(p => p.status === "completed" || p.status === "failed").length / uploadProgress.length) * 100)} 
+                              status="active"
+                            />
+                          </div>
+                          <div 
+                            className="d-flex flex-column custom-scroll" 
+                            style={{ maxHeight: '150px', overflowY: 'auto', overflowX: 'hidden' }}
+                          >
+                            {uploadProgress.map((fileProgress, index) => (
+                              <div key={index} className="d-flex flex-row mb-2" style={{ width: '100%' }}>
+                                <p className="mb-0" style={{ fontSize: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "70%" }}>
+                                  {fileProgress.fileName}
+                                </p>
+                                <p
+                                  className="ms-auto mb-0"
+                                  style={{
+                                    fontSize: "14px",
+                                    fontWeight: 600,
+                                    color:
+                                      fileProgress.status === "pending" ? "black" :
+                                        fileProgress.status === "ongoing" ? "#683ab7" :
+                                          fileProgress.status === "completed" ? "green" :
+                                            fileProgress.status === "failed" ? "red" : "black"
+                                  }}
+                                >
+                                  {fileProgress.status === "pending" && "Pending"}
+                                  {fileProgress.status === "ongoing" && "Uploading..."}
+                                  {fileProgress.status === "completed" && "Completed"}
+                                  {fileProgress.status === "failed" && "Failed"}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                 </div>
