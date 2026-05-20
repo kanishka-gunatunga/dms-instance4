@@ -53,6 +53,7 @@ export default function AllDocTable() {
 
   const [metaTags, setMetaTags] = useState<string[]>([]);
   const [currentMeta, setCurrentMeta] = useState<string>("");
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
   const [isTimeLimited, setIsTimeLimited] = useState<boolean>(false);
   const [roles, setRoles] = useState<string[]>([]);
@@ -107,7 +108,31 @@ export default function AllDocTable() {
     fetchCategoryData(setCategoryDropDownData);
     fetchRoleData(setRoleDropDownData);
     fetchAndMapUserData(setUserDropDownData);
-    fetchSectors(setSectorDropDownData)
+    fetchSectors(setSectorDropDownData);
+
+    const fetchTags = async () => {
+      try {
+        const response = await getWithAuth("get-all-meta-tags");
+        if (Array.isArray(response)) {
+          const tags = response.map((t: any) => {
+            if (typeof t === "string") return t;
+            if (t.tag_name) return t.tag_name;
+            if (t.name) return t.name;
+            if (t.meta_tag) return t.meta_tag;
+            if (t.tag) return t.tag;
+            const values = Object.values(t);
+            return values.find(v => typeof v === "string");
+          }).filter(Boolean);
+          setSuggestedTags(tags);
+        } else if (response && Array.isArray(response.data)) {
+          const tags = response.data.map((t: any) => typeof t === "string" ? t : t.tag_name || t.name || t.meta_tag || t.tag).filter(Boolean);
+          setSuggestedTags(tags);
+        }
+      } catch (err) {
+        console.error("Failed to fetch meta tags:", err);
+      }
+    };
+    fetchTags();
   }, []);
 
 
@@ -574,7 +599,7 @@ export default function AllDocTable() {
                   </p>
                   <div className="col-12">
                     <div
-                      style={{ marginBottom: "10px" }}
+                      style={{ marginBottom: "10px", position: "relative" }}
                       className="w-100 d-flex metaBorder"
                     >
                       <input
@@ -609,6 +634,43 @@ export default function AllDocTable() {
                       >
                         <IoAdd />
                       </button>
+                      {currentMeta && suggestedTags.filter(t => t.toLowerCase().includes(currentMeta.toLowerCase()) && !metaTags.includes(t)).length > 0 && (
+                        <div style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          right: 0,
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "0.375rem",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                          maxHeight: "150px",
+                          overflowY: "auto",
+                          zIndex: 1000,
+                          padding: "4px 0"
+                        }}>
+                          {suggestedTags.filter(t => t.toLowerCase().includes(currentMeta.toLowerCase()) && !metaTags.includes(t)).map((t, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => {
+                                setMetaTags((prev) => [...prev, t]);
+                                setCurrentMeta("");
+                              }}
+                              style={{
+                                padding: "8px 12px",
+                                cursor: "pointer",
+                                fontSize: "0.875rem",
+                                color: "#374151",
+                                textAlign: "left"
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
+                              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                            >
+                              {t}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div>
                       {metaTags.map((tag, index) => (
